@@ -1,0 +1,928 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+  <meta property="og:image" content="https://edy-and-priska.github.io/WeddingDay/images/married-icon.png">
+  <link rel="Website icon" type="png" href="images/married-icon.png">
+  <title>Edy & Priska Wedding</title>
+  <link rel="preload" href="images/landing-page.jpg" as="image">
+
+  <style>
+    /* Reset default margins & padding */
+    body, html {
+      margin: 0;
+      padding: 0;
+      height: 100%;
+      overflow-x: hidden;
+    }
+
+    .landing-container {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background-image: url('images/landing-page.jpg');
+      background-repeat: no-repeat;
+      background-position: center center;
+      background-size: cover;
+      z-index: 1000;
+      transition: opacity 6s ease;
+      background-color: #f0f0f0;
+    }
+
+    /* For no cropping at all (may leave empty spaces) */
+    .landing-container.no-crop {
+      background-size: contain;
+      background-color: #000;
+    }
+
+    /* For perfect display without cropping (best compromise) */
+    .landing-container.optimal {
+      background-size: cover;
+      background-position: top center;
+    }
+    
+    a, a:focus, a:active {
+      outline: none;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    /* Main Content */
+    .main-content {
+      display: none;
+      padding: 0px;
+      width: 100vw;
+      max-width: 100%;
+      box-sizing: border-box;
+      position: relative;
+      overflow-x: hidden;
+    }
+
+    .main-content.visible {
+      display: block;
+    }
+
+    .landing-container.fade-out {
+      opacity: 0;
+      animation: fadeout 4s ease-out;
+    }
+
+    .fade-in {
+      animation: fadeIn 4s ease-in;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; }
+      to { opacity: 1; }
+    }
+
+    /* Countdown Container */
+    #countdown {
+      display: flex;
+      justify-content: center;
+      gap: 10px;
+      margin: 20px auto;
+      padding: 15px;
+      width: 90%;
+      max-width: 600px;
+    }
+
+    /* Timer Units */
+    .timer-unit {
+      flex: 1;
+      min-width: 0;
+      background: rgb(255, 208, 1);
+      border-radius: 8px;
+      padding: 12px 5px;
+      box-shadow: 0 3px 6px rgba(0,0,0,0.1);
+      text-align: center;
+    }
+
+    .timer-unit span:first-child {
+      display: block;
+      font-size: 2rem;
+      font-weight: bold;
+      color: #333;
+      line-height: 1.2;
+    }
+
+    .timer-unit span.label {
+      display: block;
+      font-size: 0.9rem;
+      color: #666;
+      text-transform: capitalize;
+      letter-spacing: 0.5px;
+      margin-top: 5px;
+    }
+
+    /* Mobile Responsiveness */
+    @media (max-width: 480px) {
+      #countdown {
+        gap: 5px;
+        padding: 10px;
+      }
+      
+      .timer-unit span:first-child {
+        font-size: 1.5rem;
+      }
+      
+      .timer-unit span.label {
+        font-size: 0.7rem;
+      }
+    }
+
+    /* Image styles */
+    .image-container {
+      width: 100%;
+      margin: 0 auto;
+    }
+
+    .image-container img,
+    .image {
+      width: 100%;
+      height: auto;
+      display: block;
+      margin: 0 auto;
+    }
+
+    .image2 {
+      position: relative;
+      width: 100%;
+      max-width: 100%;
+      height: auto;
+      display: block;
+      top: 10%;    
+    }
+
+    /* Wedding Album Styles */
+    #wedding-album-container * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: 'Playfair Display', serif;
+      margin-bottom: 30px;
+    }
+    
+    #wedding-album-container .wa-container {
+      position: relative;
+      width: min(95vw, 800px);
+      height: min(95vh, 600px);
+      perspective: 2000px;
+      margin: 2rem auto;
+    }
+    
+    #wedding-album-container .wa-album {
+      width: 100%;
+      height: 100%;
+      position: relative;
+      transform-style: preserve-3d;
+    }
+    
+    #wedding-album-container .wa-page {
+      position: absolute;
+      width: 100%;
+      height: 100%;
+      top: 0;
+      left: 0;
+      transform-origin: left center;
+      background: white;
+      box-shadow: 0 3px 15px rgba(0,0,0,0.15);
+      overflow: hidden;
+      transition: transform 2.2s ease;
+      backface-visibility: hidden;
+      border-radius: 0 5px 5px 0;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      will-change: transform;
+    }
+    
+    #wedding-album-container .wa-image-container {
+      width: 100%;
+      height: 100%;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      padding: 20px;
+    }
+    
+    #wedding-album-container .wa-album-image {
+      max-width: 100%;
+      max-height: 100%;
+      width: auto;
+      height: auto;
+      object-fit: contain;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    }
+    
+    #wedding-album-container .wa-cover {
+      z-index: 11;
+      cursor: pointer;
+      border-radius: 5px;
+    }
+    
+    #wedding-album-container .wa-cover .wa-album-image {
+      object-fit: cover;
+      box-shadow: none;
+    }
+    
+    #wedding-album-container .wa-open-prompt {
+      position: absolute;
+      bottom: 30%;
+      left: 50%;
+      transform: translateX(-50%);
+      background: rgba(0,0,0,0.7);
+      color: white;
+      padding: 8px 16px;
+      border-radius: 20px;
+      font-size: 1rem;
+      animation: wa-gentlePulse 2s infinite;
+    }
+    
+    @keyframes wa-gentlePulse {
+      0% { opacity: 0.8; }
+      50% { opacity: 1; }
+      100% { opacity: 0.8; }
+    }
+    
+    #wedding-album-container .wa-navigation {
+      position: absolute;
+      bottom: -50px;
+      left: 0;
+      width: 100%;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 0 10px;
+    }
+    
+    #wedding-album-container .wa-nav-btn {
+      padding: 8px 16px;
+      background: #d4af37;
+      color: white;
+      border: none;
+      border-radius: 4px;
+      font-family: 'Playfair Display', serif;
+      font-size: 1rem;
+      cursor: pointer;
+      transition: all 0.3s;
+    }
+    
+    #wedding-album-container .wa-nav-btn:hover:not(:disabled) {
+      background: #c19b3c;
+      transform: translateY(-2px);
+    }
+    
+    #wedding-album-container .wa-nav-btn:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+    
+    #wedding-album-container .wa-page-indicator {
+      font-size: 1.1rem;
+      color: #555;
+      text-align: center;
+      min-width: 120px;
+    }
+    
+    /* Initial state */
+    #wedding-album-container .wa-page:not(.wa-cover) {
+      transform: rotateY(-180deg);
+      visibility: hidden;
+    }
+    
+    /* Mobile adjustments */
+    @media (max-width: 600px) {
+      #wedding-album-container .wa-container {
+        height: min(90vh, 500px);
+      }
+      
+      #wedding-album-container .wa-nav-btn {
+        padding: 6px 12px;
+        font-size: 0.9rem;
+      }
+      
+      #wedding-album-container .wa-page-indicator {
+        font-size: 0.9rem;
+        min-width: 100px;
+      }
+      
+      #wedding-album-container .wa-image-container {
+        padding: 10px;
+      }
+    }
+
+    /* Snowflakes styling */
+    #snowflakesContainer {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+      z-index: 9999;
+    }
+
+    .snowflake {
+      position: absolute;
+      color: #14edf5;
+      font-size: 1em;
+      pointer-events: none;
+      animation: fall linear forwards;
+      z-index: 1000;
+      opacity: 0.8;
+      text-shadow: 0 0 5px rgba(255, 255, 255, 0.5);
+    }
+
+    @keyframes fall {
+      to {
+        transform: translateY(100vh) rotate(360deg);
+        opacity: 0;
+      }
+    } 
+
+    /* Remove tap highlight for all interactive elements */
+    button, a, input, textarea, select {
+      -webkit-tap-highlight-color: transparent;
+      outline: none;
+    }
+
+    /* Specifically for your pulse button */
+    .pulse-button {
+      /* Your existing styles */
+      -webkit-tap-highlight-color: rgba(0,0,0,0);
+      -webkit-tap-highlight-color: transparent;
+      -webkit-user-select: none;
+      -moz-user-select: none;
+      -ms-user-select: none;
+      user-select: none;
+      -webkit-touch-callout: none;
+    }
+
+    /* Active state styling */
+    .pulse-button:active {
+      transform: scale(0.98);
+      background-color: #ffecb4;
+    }
+  </style>
+</head>
+
+<body>
+   <!-- Snowflakes Container -->
+   <div id="snowflakesContainer"></div>
+
+  <!-- ===== LANDING PAGE ===== -->
+  <div class="landing-container" id="landingPage">
+    <div>
+      <button class="pulse-button" id="pulse-button">
+      <img src="images/married-icon.png" alt="" class="button-icon">
+      <span>Wedding Info</span>
+    </button>
+    </div>
+
+    <style>
+    .pulse-button {
+      position: absolute;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 12px;
+      padding: 12px 25px;
+      font-size: clamp(14px, 2vw, 18px);
+      font-weight: bold;
+      color: rgb(0, 0, 0);
+      background: #ffecb4;
+      border: none;
+      border-radius: 50px;
+      cursor: pointer;
+      box-shadow: 0 0 0 0 rgba(255, 107, 107, 0.7);
+      animation: pulse 1.5s infinite;
+      transition: all 0.3s ease;
+      text-transform: capitalize;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+    }
+    
+    .button-icon {
+      width: auto;
+      height: clamp(20px, 3vw, 28px);
+      object-fit: contain;
+    }
+    
+    .pulse-button:hover {
+      background: #ffecb4;
+      transform: scale(1.05);
+    }
+    
+    @keyframes pulse {
+      0% {
+        transform: scale(1);
+        box-shadow: 0 0 0 0 rgba(255, 236, 180, 255);
+      }
+      70% {
+        transform: scale(1.02);
+        box-shadow: 0 0 0 15px rgba(255, 107, 107, 0);
+      }
+      100% {
+        transform: scale(1);
+        box-shadow: 0 0 0 0 rgba(255, 107, 107, 0);
+      }
+    }
+    
+    @media screen and (min-width: 344px) and (max-width: 359px) {
+      .pulse-button {
+        top: 38%;
+        left: 27%;
+        padding: 14px 22px;
+        gap: 6px;
+      }
+    }
+    @media screen and (min-width: 360px) and (max-width: 374px) {
+      .pulse-button {
+        top: 38%;
+        left: 31%;
+        padding: 8px 9px;
+        gap: 6px;
+      }
+    }
+    @media screen and (min-width: 375px) and (max-width: 389px) {
+      .pulse-button {
+        top: 37.8%;
+        left: 33%;
+        padding: 8px 12px;
+        gap: 6px;
+      }
+    }
+    @media screen and (min-width: 390px) and (max-width: 400px) {
+      .pulse-button {
+        top: 37.5%;
+        left: 31%;
+        padding: 14px 22px;
+        gap: 6px;
+      }
+    }
+    @media screen and (min-width: 401px) and (max-width: 500px) {
+      .pulse-button {
+        top: 38.5%;
+        left: 34%;
+        padding: 9px 18px;
+        gap: 6px;
+      }
+    }
+    @media screen and (min-width: 540px) and (max-width: 767px) {
+      .pulse-button {
+        top: 34.5%;
+        left: 37%;
+        padding: 11px 22px;
+        gap: 8px;
+      }
+    }
+    @media screen and (min-width: 768px) and (max-width: 818px) {
+      .pulse-button {
+        top: 35%;
+        left: 40%;
+        padding: 12px 24px;
+        gap: 9px;
+      }
+    }
+    @media screen and (min-width: 819px) and (max-width: 830px) {
+      .pulse-button {
+        top: 35.5%;
+        left: 39%;
+        padding: 20px 38px;
+        gap: 16px;
+      }
+    }
+    @media screen and (min-width: 830px) and (max-width: 911px) {
+      .pulse-button {
+        top: 33%;
+        left: 40%;
+        padding: 13px 26px;
+        gap: 10px;
+      }
+    }
+    @media screen and (min-width: 912px) and (max-width: 1023px) {
+      .pulse-button {
+        top: 37%;
+        left: 41%;
+        padding: 13px 26px;
+        gap: 10px;
+      }
+    }
+    @media screen and (min-width: 1024px) and (max-width: 1100px) {
+      .pulse-button {
+        top: 30%;
+        left: 41%;
+        padding: 14px 28px;
+        gap: 12px;
+      }
+    }
+    </style>
+  </div>
+
+  <!-- ===== MAIN CONTENT ===== -->
+  <div class="main-content" id="mainContent">
+    <div class="image-container"></div>
+    <img src="images/1.jpg" class="image">
+    <img src="images/4.jpg" class="image2">
+
+    <div id="countdown">
+      <div class="timer-unit">
+        <span id="days">0</span>
+        <span class="label">Days</span>
+      </div>
+      <div class="timer-unit">
+        <span id="hours">00</span>
+        <span class="label">Hours</span>
+      </div>
+      <div class="timer-unit">
+        <span id="minutes">00</span>
+        <span class="label">Minutes</span>
+      </div>
+      <div class="timer-unit">
+        <span id="seconds">00</span>
+        <span class="label">Seconds</span>
+      </div>
+    </div>
+    
+    <img src="images/Weddinginfo.jpg" class="image2">
+    
+    <!-- Wedding Album -->
+    <div id="wedding-album-container">
+      <div class="wa-container">
+        <div class="wa-album">
+          <!-- Cover -->
+          <div class="wa-page wa-cover" id="wa-cover">
+            <div class="wa-image-container">
+              <img src="cover.jpg" alt="Wedding Album Cover" class="wa-album-image">
+            </div>
+            <div class="wa-open-prompt">Our Wedding Album</div>
+          </div>
+          
+          <!-- Pages -->
+          <div class="wa-page" id="wa-page1">
+            <div class="wa-image-container">
+              <img src="photo1.jpg" alt="Wedding Photo 1" class="wa-album-image">
+            </div>
+          </div>
+          <div class="wa-page" id="wa-page2">
+            <div class="wa-image-container">
+              <img src="photo2.jpg" alt="Wedding Photo 2" class="wa-album-image">
+            </div>
+          </div>
+          <div class="wa-page" id="wa-page3">
+            <div class="wa-image-container">
+              <img src="photo3.jpg" alt="Wedding Photo 3" class="wa-album-image">
+            </div>
+          </div>
+          <div class="wa-page" id="wa-page4">
+            <div class="wa-image-container">
+              <img src="photo4.jpg" alt="Wedding Photo 4" class="wa-album-image">
+            </div>
+          </div>
+          <div class="wa-page" id="wa-page5">
+            <div class="wa-image-container">
+              <img src="photo5.jpg" alt="Wedding Photo 5" class="wa-album-image">
+            </div>
+          </div>
+          <div class="wa-page" id="wa-page6">
+            <div class="wa-image-container">
+              <img src="photo6.jpg" alt="Wedding Photo 6" class="wa-album-image">
+            </div>
+          </div>
+          <div class="wa-page" id="wa-page7">
+            <div class="wa-image-container">
+              <img src="photo7.jpg" alt="Wedding Photo 7" class="wa-album-image">
+            </div>
+          </div>
+          <div class="wa-page" id="wa-page8">
+            <div class="wa-image-container">
+              <img src="photo8.jpg" alt="Wedding Photo 8" class="wa-album-image">
+            </div>
+          </div>
+          <div class="wa-page" id="wa-page9">
+            <div class="wa-image-container">
+              <img src="photo9.jpg" alt="Wedding Photo 9" class="wa-album-image">
+            </div>
+          </div>
+          <div class="wa-page" id="wa-page10">
+            <div class="wa-image-container">
+              <img src="photo10.jpg" alt="Wedding Photo 10" class="wa-album-image">
+            </div>
+          </div>
+        </div>
+        
+        <!-- Navigation -->
+        <div class="wa-navigation" id="wa-navButtons" style="display: none;">
+          <button class="wa-nav-btn" id="wa-prevBtn" disabled>‹ Previous</button>
+          <span class="wa-page-indicator" id="wa-pageIndicator">Cover</span>
+          <button class="wa-nav-btn" id="wa-nextBtn">Next ›</button>
+        </div>
+      </div>
+    </div>
+    
+    <img src="images/3.jpg" class="image">
+  </div>
+
+  <!-- Background Music -->
+  <audio id="weddingMusic" src="music/Zui Mei Qing Lu.mp3" loop></audio>
+
+  <script>
+    // Snowflake effect control
+    let snowInterval;
+    let snowflakesPaused = false;
+    const snowflakeSymbols = ['❄', '❆', '✻', '✼', '✽'];
+
+    function startSnowfall() {
+      const container = document.getElementById('snowflakesContainer');
+      
+      // Clear any existing interval
+      if (snowInterval) clearInterval(snowInterval);
+      
+      // Create initial batch of snowflakes
+      createSnowflakes(container);
+      
+      // Keep creating new snowflakes every 300ms
+      snowInterval = setInterval(() => {
+        if (!snowflakesPaused) {
+          createSnowflakes(container);
+        }
+      }, 300);
+    }
+
+    function pauseSnowflakes() {
+      snowflakesPaused = true;
+      // Clear all existing snowflakes
+      const container = document.getElementById('snowflakesContainer');
+      container.innerHTML = '';
+    }
+
+    function resumeSnowflakes() {
+      snowflakesPaused = false;
+    }
+
+    function createSnowflakes(container) {
+      // Create 3-5 snowflakes at a time
+      const count = Math.floor(Math.random() * 3) + 3;
+      
+      for (let i = 0; i < 1; i++) {
+        const snowflake = document.createElement('div');
+        const randomSymbol = snowflakeSymbols[Math.floor(Math.random() * snowflakeSymbols.length)];
+        snowflake.innerHTML = randomSymbol;
+        snowflake.classList.add('snowflake');
+        
+        // Random properties
+        const size = Math.random() * 1.5 + 0.5;
+        const startX = Math.random() * window.innerWidth;
+        const duration = Math.random() * 5 + 5;
+        const delay = Math.random() * 2;
+        const opacity = Math.random() * 0.7 + 0.3;
+        
+        snowflake.style.left = `${startX}px`;
+        snowflake.style.fontSize = `${size}em`;
+        snowflake.style.animationDuration = `${duration}s`;
+        snowflake.style.animationDelay = `${delay}s`;
+        snowflake.style.opacity = opacity;
+        
+        container.appendChild(snowflake);
+        
+        // Remove snowflake after animation completes
+        setTimeout(() => {
+          if (snowflake.parentNode) {
+            snowflake.remove();
+          }
+        }, (duration + delay) * 1000);
+      }
+    }
+
+    // Main invitation button functionality
+    document.getElementById('pulse-button').addEventListener('click', function() {
+      const landingPage = document.getElementById('landingPage');
+      const mainContent = document.getElementById('mainContent');
+      const music = document.getElementById('weddingMusic');
+
+      // Play music
+      music.play().catch(e => console.log("Music play failed. User may need to interact first."));
+
+      // Start infinite snowflakes
+      startSnowfall();
+      
+      // Fade out landing page
+      landingPage.classList.add('fade-out');
+      setTimeout(() => {
+        landingPage.style.display = 'none';
+      }, 1500);
+
+      // Show main content
+      mainContent.style.display = 'block';
+      mainContent.classList.add('fade-in');
+    });
+
+    // Wedding Album Script
+    (function() {
+      // Album configuration
+      const config = {
+        totalPages: 10,
+        animationDuration: 800,
+        autoReturnDelay: 4000
+      };
+
+      // DOM elements
+      const elements = {
+        cover: document.getElementById('wa-cover'),
+        pages: Array.from(document.querySelectorAll('#wedding-album-container .wa-page:not(.wa-cover)')),
+        prevBtn: document.getElementById('wa-prevBtn'),
+        nextBtn: document.getElementById('wa-nextBtn'),
+        pageIndicator: document.getElementById('wa-pageIndicator'),
+        navButtons: document.getElementById('wa-navButtons')
+      };
+
+      // State management
+      let state = {
+        currentPageIndex: -1,
+        isAnimating: false,
+        returnTimeout: null
+      };
+
+      // Initialize album
+      function initAlbum() {
+        elements.pages.forEach(page => {
+          page.style.transform = 'rotateY(-180deg)';
+          page.style.visibility = 'hidden';
+        });
+        
+        // Add event listeners
+        elements.cover.addEventListener('click', startAlbum);
+        elements.prevBtn.addEventListener('click', goToPreviousPage);
+        elements.nextBtn.addEventListener('click', goToNextPage);
+      }
+
+      // Start the album
+      function startAlbum() {
+        if (state.isAnimating) return;
+        clearTimeout(state.returnTimeout);
+        
+        state.isAnimating = true;
+        elements.cover.style.transform = 'rotateY(-180deg)';
+        elements.navButtons.style.display = 'flex';
+        
+        // Pause snowflakes when album opens
+        pauseSnowflakes();
+
+        setTimeout(() => {
+          elements.cover.style.visibility = 'hidden';
+          showPage(0);
+          state.currentPageIndex = 0;
+          state.isAnimating = false;
+          updateNavigation();
+        }, config.animationDuration);
+      }
+
+      // Go to next page
+      function goToNextPage() {
+        if (state.isAnimating || state.currentPageIndex >= config.totalPages - 1) return;
+        clearTimeout(state.returnTimeout);
+        
+        state.isAnimating = true;
+        const currentPage = elements.pages[state.currentPageIndex];
+        flipPageOut(currentPage);
+        
+        state.currentPageIndex++;
+        showPage(state.currentPageIndex);
+        
+        setTimeout(() => {
+          state.isAnimating = false;
+          updateNavigation();
+          
+          // Auto-return if on last page
+          if (state.currentPageIndex === config.totalPages - 1) {
+            state.returnTimeout = setTimeout(returnToCover, config.autoReturnDelay);
+          }
+        }, config.animationDuration);
+      }
+
+      // Go to previous page
+      function goToPreviousPage() {
+        if (state.isAnimating || state.currentPageIndex < 0) return;
+        clearTimeout(state.returnTimeout);
+        
+        state.isAnimating = true;
+        const currentPage = elements.pages[state.currentPageIndex];
+        flipPageOut(currentPage);
+        
+        state.currentPageIndex--;
+        
+        if (state.currentPageIndex === -1) {
+          setTimeout(() => {
+            currentPage.style.visibility = 'hidden';
+            elements.cover.style.visibility = 'visible';
+            elements.cover.style.transform = 'rotateY(0deg)';
+            state.isAnimating = false;
+            elements.navButtons.style.display = 'none';
+            // Resume snowflakes only when returning to cover
+            resumeSnowflakes();
+          }, config.animationDuration);
+          return;
+        }
+        
+        showPage(state.currentPageIndex);
+        
+        setTimeout(() => {
+          state.isAnimating = false;
+          updateNavigation();
+        }, config.animationDuration);
+      }
+
+      // Return to cover
+      function returnToCover() {
+        if (state.currentPageIndex !== config.totalPages - 1) return;
+        
+        state.isAnimating = true;
+        const currentPage = elements.pages[state.currentPageIndex];
+        flipPageOut(currentPage);
+        
+        setTimeout(() => {
+          currentPage.style.visibility = 'hidden';
+          elements.cover.style.visibility = 'visible';
+          elements.cover.style.transform = 'rotateY(0deg)';
+          state.currentPageIndex = -1;
+          state.isAnimating = false;
+          elements.navButtons.style.display = 'none';
+          updateNavigation();
+          
+          // Resume snowflakes when album fully closes
+          resumeSnowflakes();
+        }, config.animationDuration);
+      }
+
+      // Flip page out animation
+      function flipPageOut(page) {
+        page.style.transform = 'rotateY(-180deg)';
+        setTimeout(() => {
+          page.style.visibility = 'hidden';
+        }, config.animationDuration);
+      }
+
+      // Show page animation
+      function showPage(index) {
+        const page = elements.pages[index];
+        page.style.visibility = 'visible';
+        // Force reflow to ensure smooth animation
+        void page.offsetWidth;
+        page.style.transform = 'rotateY(0deg)';
+      }
+
+      // Update navigation controls
+      function updateNavigation() {
+        elements.prevBtn.disabled = state.currentPageIndex <= 0;
+        elements.nextBtn.disabled = state.currentPageIndex >= config.totalPages - 1;
+        
+        if (state.currentPageIndex === -1) {
+          elements.pageIndicator.textContent = 'Cover';
+        } else {
+          elements.pageIndicator.textContent = `Page ${state.currentPageIndex + 1} of ${config.totalPages}`;
+        }
+      }
+
+      // Initialize the album
+      initAlbum();
+    })();
+
+    // Page load effects
+    window.onload = function() {
+      document.body.style.opacity = 1;
+      
+      if (sessionStorage.getItem("music-playing") === "true") {
+        let music = document.getElementById("weddingMusic");
+        if (music) {
+          music.play().catch(error => {
+            console.log("Autoplay blocked: " + error);
+          });
+        }
+      }
+    };
+
+    // Zoom functionality
+    let zoomLevel = 1;
+    window.addEventListener("wheel", function(event) {
+      if (event.ctrlKey) {
+        event.preventDefault();
+        
+        if (event.deltaY < 0) {
+          zoomLevel += 0.1;
+        } else {
+          zoomLevel -= 0.1;
+        }
+
+        zoomLevel = Math.min(Math.max(zoomLevel, 0.5), 2);
+        document.body.style.transform = `scale(${zoomLevel})`;
+        document.body.style.transformOrigin = "center top";
+      }
+    });
+  </script>
+  <script src="script.js"></script>
+</body>
+</html>
